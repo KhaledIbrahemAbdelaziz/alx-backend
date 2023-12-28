@@ -42,4 +42,4 @@ class Server:
         if (first >= len(data) or final >= len(data)):
             return []
         else:
-            data[first:final]
+            return data[first:final]
