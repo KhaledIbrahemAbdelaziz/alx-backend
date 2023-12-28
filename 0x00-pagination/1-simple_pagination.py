@@ -39,5 +39,7 @@ class Server:
         assert page > 0 and page_size > 0
         first, final = index_range(page, page_size)
         data = self.dataset()
-        return [] if (first >= len(dataset) or
-                      final >= len(dataset)) else data[first:final]
+        if (first >= len(dataset) or final >= len(dataset)):
+            return []
+        else:
+            data[first:final]
