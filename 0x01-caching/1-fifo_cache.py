@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Task 1"""
+"""First-In First-Out caching module.
+"""
 from collections import OrderedDict
+
 from base_caching import BaseCaching
 
 
 class FIFOCache(BaseCaching):
-    """Representing Queue Caching"""
+    """Represents an object that allows storing and
+    retrieving items from a dictionary with a FIFO
+    removal mechanism when the limit is reached.
+    """
     def __init__(self):
         """Initializes the cache.
         """
@@ -13,8 +18,8 @@ class FIFOCache(BaseCaching):
         self.cache_data = OrderedDict()
 
     def put(self, key, item):
-        """assign to the dictionary self.cache_data
-        the item value for the key key"""
+        """Adds an item in the cache.
+        """
         if key and item:
             self.cache_data[key] = item
         if len(self.cache_data) > BaseCaching.MAX_ITEMS:
@@ -22,5 +27,6 @@ class FIFOCache(BaseCaching):
             print("DISCARD:", keydiscard)
 
     def get(self, key):
-        """ return the value in self.cache_data linked to key."""
+        """Retrieves an item by key.
+        """
         return self.cache_data.get(key, None)
