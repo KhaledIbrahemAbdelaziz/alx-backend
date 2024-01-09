@@ -4,7 +4,7 @@ from flask import Flask, render_template
 from flask_babel import Babel
 
 
-class Config():
+class Config:
     """Languages class"""
     LANGUAGES = ["en", "fr"]
     BABEL_DEFAULT_LOCALE = "en"
@@ -17,7 +17,7 @@ app.url_map.strict_slashes = False
 babel = Babel(app)
 
 @app.route("/")
-def welcomephrase():
+def welcomephrase() -> str:
     """ Hello page """
     return render_template('1-index.html')
 
