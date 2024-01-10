@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-""" 2. get local from request """
+""" Module for trying out Babel i18n """
+from flask_babel import Babel, _
 from flask import Flask, render_template, request, g
-from flask_babel import Babel
+import pytz
+from typing import Union
 
-
-class Config:
-    """ Config class for app """
-    LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = "en"
-    BABEL_DEFAULT_TIMEZONE = "UTC"
-
-
-app = Flask(__name__)
-app.config.from_object(Config)
-app.url_map.strict_slashes = False
+app = Flask(__name__, template_folder='templates')
 babel = Babel(app)
 
+
+class Config(object):
+    """ Configuration Class for Babel """
+
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
+
+
+app.config.from_object(Config)
 
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
@@ -25,38 +27,52 @@ users = {
 }
 
 
-def get_user(login_as: str) -> dict:
-    """ Get user from users """
-    return users.get(int(login_as), None)
+def get_user() -> Union[dict, None]:
+    """ Returns a user dictionary or
+    None if the ID cannot be found or
+    if login_as was not passed.
+    """
+
+    try:
+        login_as = request.args.get("login_as")
+        user = users[int(login_as)]
+    except Exception:
+        user = None
+
+    return user
 
 
 @app.before_request
-def before_request() -> None:
-    """ Before request """
-    user = get_user(request.args.get('login_as'))
-    if user:
-        g.user = user
+def before_request():
+    """ Operations that happen before any request """
+    user = get_user()
+    g.user = user
+
+
+@app.route('/', methods=['GET'], strict_slashes=False)
+def hello_world() -> str:
+    """Renders a Basic Template for Babel Implementation"""
+    return render_template("6-index.html")
 
 
 @babel.localeselector
 def get_locale() -> str:
-    """ Get locale from request """
-    locale = request.args.get('locale')
-    if locale and locale in app.config["LANGUAGES"]:
+    """Select a language translation to use for that request"""
+    locale = request.args.get("locale")
+    if locale and locale in app.config['LANGUAGES']:
         return locale
-    if g.user and g.user.get('locale') in app.config["LANGUAGES"]:
-        return g.user.get('locale')
-    header_locale = request.headers.get('locale')
-    if header_locale and header_locale in app.config["LANGUAGES"]:
-        return header_locale
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+    if g.user:
+        locale = g.user.get("locale")
+        if locale and locale in app.config['LANGUAGES']:
+            return locale
+
+    locale = request.headers.get('locale')
+    if locale and locale in app.config['LANGUAGES']:
+        return locale
+
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
-@app.route("/")
-def welcome() -> str:
-    """ / page """
-    return render_template('6-index.html')
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run()
